@@ -1,20 +1,30 @@
 # Результат тестового задания
-Реализованны:
-1. телеграм-бот для конечных пользователей, написанный на `aiogram`
-2. полу-рак, полу-микросервис на `FastAPI`
+## Как запустить локально
+1. склонируйте этот репозиторий
+2. установите переменные среды или запишите их в `.env` файл по файлу-примеру `.env-example.docker-compose.dev`
+3. установите структуру базы данных
+4. запустите внутри `Docker` при помощи `Docker-compose`
 
-Можно запустить при помощи команд:
+Клонирование:
 ```bash
-git clone https://github.com/emptybutton/Test-bot.git
-docker compose --project-directory ./Test-bot up
+git clone https://github.com/emptybutton/Test-cryptobot.git
 ```
 
-## Телеграм-бот
-Запрашивает у пользователя два числа и отправляет их в FastAPI-приложение для "вычисления":
+Остальные комманды после установки переменных окружения внутри, `Test-cryptobot` директории:
+```bash
+docker compose -f docker-compose.dev.yml run cryptobot alembic upgrade head
+docker compose -f docker-compose.dev.yml up
+```
 
-<img src="https://github.com/emptybutton/Test-bot/blob/main/assets/dialog.png?raw=true"/>
+## Пример использования
+<img src="https://github.com/emptybutton/Test-cryptobot/blob/main/assets/dialog.png?raw=true"/>
 
-## API приложения
-Имеет один эндпоинт для сложения двух чисел:
+> [!NOTE]
+> - Можно отслеживать множество криптовалют по разным диапазонам
+> - Диапазон указывается в долларах
+> - Каждые 30 секунд в Telegram приходят оповещения об изменении криптовалюты относительно указанного диапазона
 
-<img src="https://github.com/emptybutton/Test-bot/blob/main/assets/api.png?raw=true"/>
+## От себя
+Некоторые модули задокументированы. Там описываются либо будущие решения, либо неочевидности. Оставлял как комментарии, потому что это тестовое, но по идее такие вещи в вики следует переносить.</br>
+
+Если что wip — "work in process", но обычно так не пишу, а использую [это](https://gist.github.com/ericavonb/3c79e5035567c8ef3267).
