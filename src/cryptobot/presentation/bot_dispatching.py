@@ -1,6 +1,8 @@
-from aiogram import Dispatcher
-from aiogram.filters import CommandStart
+from functools import partial
+
+from aiogram import Dispatcher, F
 from aiogram.types import Message
+from aiogram.filters import CommandStart
 
 from cryptobot.presentation.parsers import as_number
 from cryptobot.facade import services
@@ -11,33 +13,32 @@ dispatcher = Dispatcher()
 
 @dispatcher.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
+    if message.text != "/start":
+        return
+
     await services.register_user.perform(message.chat.id)
     await message.answer("Привет! Введи /help для списка всех комманд")
 
 
-@dispatcher.message()
+@dispatcher.message(F.text == "/help")
 async def command_help_handler(message: Message) -> None:
-    if message.text != "/help":
-        return
-
-    await message.answer(
+    text = (
         "Комманды:\n"
-        "/start - перезапусе бота\n"
+        "/start - перезапустить бота\n"
         "/track <название приптовалюты> <первое число диапазона>"
         " <второе число диапазона> - отслеживать криптовалюту"
     )
+    await message.answer(text, parse_mode="Markdown")
 
 
-@dispatcher.message()
+@dispatcher.message(F.text[:6] == "/track")
 async def command_track_handler(message: Message) -> None:
-    if message.text != "/track":
-        return
-
+    answer = partial(message.answer, parse_mode="Markdown")
     words = message.text.split()
     arguments = words[1:]
 
     if len(arguments) != 3:
-        await message.answer(
+        await answer(
             "Неправильные аргументы. Пример правильных:\n"
             "/track BTC 5000 6000"
         )
@@ -48,7 +49,7 @@ async def command_track_handler(message: Message) -> None:
     second_threshold_dollars = as_number(arguments[2])
 
     if None in (first_threshold_dollars, second_threshold_dollars):
-        await message.answer(
+        await answer(
             "Неправильный диапазон. Пример правильного:\n"
             "/track BTC 5000 6000"
         )
@@ -61,8 +62,8 @@ async def command_track_handler(message: Message) -> None:
             first_threshold_dollars,
             second_threshold_dollars,
         )
-        await message.answer("Отслеживание \"{cryptocurrency_symbol}\" началось")
+        await answer(f"Отслеживание \"{cryptocurrency_symbol}\" началось")
     except services.add_tracking.CoinmarketcapIsNotWorkingError:
-        await message.answer("Произошла ошибка. Попробуйте позже")
+        await answer("Произошла ошибка. Попробуйте позже")
     except services.add_tracking.NoCryptocurrencyError:
-        await message.answer(f"Криптовалюты \"{cryptocurrency_symbol}\" не знаем")
+        await answer(f"Криптовалюты \"{cryptocurrency_symbol}\" не знаем")

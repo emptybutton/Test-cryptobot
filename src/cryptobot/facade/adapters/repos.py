@@ -116,8 +116,8 @@ class Trackings(repos.Trackings):
             id=data.id,
             user_id=data.user_id,
             cryptocurrency_id=cryptocurrency_id,
-            lower_threshold_dollars=vos.Threshold(dollars=lower_threshold_dollars),
-            upper_threshold_dollars=vos.Threshold(dollars=upper_threshold_dollars),
+            lower_threshold=vos.Threshold(dollars=lower_threshold_dollars),
+            upper_threshold=vos.Threshold(dollars=upper_threshold_dollars),
         )
 
 
@@ -129,7 +129,7 @@ class Cryptocurrencies(repos.Cryptocurrencies):
         stmt = insert(tables.Cryptocurrency).values(
             id=cryptocurrency.id,
             symbol=cryptocurrency.symbol,
-            in_dollars=cryptocurrency.in_dollars,
+            in_dollars=cryptocurrency.in_dollars.amount,
         )
 
         await self.session.execute(stmt)

@@ -6,8 +6,6 @@ services:
     restart: unless-stopped
     network_mode: host
     command: ["python", "src/aiogram_entrypoint.py"]
-    depends_on:
-      - postgres
     volumes:
       - .:/cryptobot
     environment:
@@ -28,8 +26,6 @@ services:
     restart: unless-stopped
     network_mode: host
     command: ["python", "src/task_entrypoint.py"]
-    depends_on:
-      - postgres
     volumes:
       - .:/cryptobot
     environment:

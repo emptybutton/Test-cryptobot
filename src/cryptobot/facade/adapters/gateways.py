@@ -96,16 +96,24 @@ class CoinmarketcapGateway(gateways.CoinmarketcapGateway):
         headers = {"X-CMC_PRO_API_KEY": token}
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params=params, headers=headers) as response:
+            async with session.get(url, params=params, headers=headers, ssl=False) as response:
                 if response.status != 200:
                     return gateways.CoinmarketcapGatewayBadResult.denied
 
                 response_body = await response.json()
-                id = response_body["data"]["id"]
-                price = response_body["data"]["quote"]["USD"]["price"]
 
-                return entities.Cryptocurrency(
-                    id=id,
-                    symbol=symbol,
-                    in_dollars=vos.Dollars(amount=price),
-                )
+        raw_cryptocurrencies = response_body["data"]
+
+        if len(raw_cryptocurrencies) == 0:
+            return gateways.CoinmarketcapGatewayBadResult.no_cryptocurrency
+
+        raw_cryptocurrency = raw_cryptocurrencies[0]
+
+        id = str(raw_cryptocurrency["id"])
+        price = int(raw_cryptocurrency["quote"]["USD"]["price"])
+
+        return entities.Cryptocurrency(
+            id=id,
+            symbol=symbol,
+            in_dollars=vos.Dollars(amount=price),
+        )
