@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Self
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True)
 class Dollars:
     amount: int
 
@@ -13,7 +13,7 @@ class Dollars:
         return self.amount >= other.amount
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, frozen=True)
 class Threshold:
     dollars: Dollars
 

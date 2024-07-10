@@ -29,7 +29,7 @@ class Trackings(ABC):
     async def add(self, tracking: Tracking) -> None: ...
 
     @abstractmethod
-    async def find_by_cryptocurrency_id(
+    def find_by_cryptocurrency_id(
         self,
         cryptocurrency_id: str,
     ) -> AsyncIterable[Tracking]: ...

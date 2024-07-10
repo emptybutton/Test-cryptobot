@@ -6,8 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.periphery.db.engines import db_url
-from src.periphery.db.tables import Base
+from cryptobot.periphery.db.engines import db_url
+from cryptobot.periphery.db.tables import Base
 
 
 config = context.config

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from src.periphery.db import engines
+from cryptobot.periphery.db import engines
 
 
 postgres_session_factory = sessionmaker(

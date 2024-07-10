@@ -1,14 +1,9 @@
 from cryptobot.application import ports
 
 
-class BaseError(Exception): ...
-
-
-class NoUserError(BaseError): ...
-
-
 async def perform(
     *,
+    transaction: ports.transactions.Transaction,
     users: ports.repos.Users,
     trackings: ports.repos.Trackings,
     cryptocurrencies: ports.repos.Cryptocurrencies,
@@ -18,7 +13,7 @@ async def perform(
     logger: ports.loggers.Logger,
 ) -> None:
     async for local_cryptocurrency in cryptocurrencies:
-        cryptocurrency_trackings = await trackings.find_by_cryptocurrency_id(
+        cryptocurrency_trackings = trackings.find_by_cryptocurrency_id(
             local_cryptocurrency.id
         )
 
@@ -73,4 +68,5 @@ async def perform(
                     user, tracking, exchange_cryptocurrency
                 )
 
-            await cryptocurrencies.update(exchange_cryptocurrency)
+            async with transaction:
+                await cryptocurrencies.update(exchange_cryptocurrency)

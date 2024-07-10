@@ -2,14 +2,12 @@ import typenv
 
 
 _env = typenv.Env()
+_env.read_env(".env", override=True)
 
 
 class Env:
     telegram_bot_token = _env.str("TELEGRAM_BOT_TOKEN")
     coinmarketcap_token = _env.str("COINMARKETCAP_TOKEN")
-
-    redis_host = _env.str("REDIS_HOST")
-    redis_port = _env.int("REDIS_PORT")
 
     postgres_database = _env.str("POSTGRES_DATABASE")
     postgres_username = _env.str("POSTGRES_USER")

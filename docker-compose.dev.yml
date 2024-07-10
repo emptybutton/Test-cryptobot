@@ -1,0 +1,68 @@
+version: "3.9"
+services:
+  cryptobot:
+    build: .
+    container_name: cryptobot
+    restart: unless-stopped
+    network_mode: host
+    command: ["python", "src/aiogram_entrypoint.py"]
+    depends_on:
+      - postgres
+    volumes:
+      - .:/cryptobot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      COINMARKETCAP_TOKEN: ${COINMARKETCAP_TOKEN}
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      POSTGRES_DATABASE: root
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_ECHO: false
+
+  cryptobot-tasks:
+    build: .
+    container_name: cryptobot-tasks
+    restart: unless-stopped
+    network_mode: host
+    command: ["python", "src/task_entrypoint.py"]
+    depends_on:
+      - postgres
+    volumes:
+      - .:/cryptobot
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      COINMARKETCAP_TOKEN: ${COINMARKETCAP_TOKEN}
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      POSTGRES_DATABASE: root
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_ECHO: false
+
+  nginx:
+    image: nginx:alpine
+    container_name: cryptobot-nginx
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+  postgres:
+    image: postgres:alpine
+    container_name: cryptobot-postgres
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: root
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+
+volumes:
+  db: null

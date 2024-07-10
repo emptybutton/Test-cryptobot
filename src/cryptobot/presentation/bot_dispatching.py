@@ -2,8 +2,8 @@ from aiogram import Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from src.presentation.parsers import number_pair_from
-from src.cases import calculating, users
+from cryptobot.presentation.parsers import as_number
+from cryptobot.facade import services
 
 
 dispatcher = Dispatcher()
@@ -11,22 +11,58 @@ dispatcher = Dispatcher()
 
 @dispatcher.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    await users.register_user(message.chat.id)
-    await message.answer("Привет! Напиши два числа через пробел чтобы суммировать их")
+    await services.register_user.perform(message.chat.id)
+    await message.answer("Привет! Введи /help для списка всех комманд")
 
 
 @dispatcher.message()
-async def calculate(message: Message) -> None:
-    number_pair = number_pair_from(message.text)
-
-    if number_pair is None:
-        await message.answer("У вас числа неправильные")
+async def command_help_handler(message: Message) -> None:
+    if message.text != "/help":
         return
 
-    sum_ = await calculating.sumOf(*number_pair)
+    await message.answer(
+        "Комманды:\n"
+        "/start - перезапусе бота\n"
+        "/track <название приптовалюты> <первое число диапазона>"
+        " <второе число диапазона> - отслеживать криптовалюту"
+    )
 
-    if sum_ is None:
-        await message.answer("Вы суммировали числа!")
+
+@dispatcher.message()
+async def command_track_handler(message: Message) -> None:
+    if message.text != "/track":
         return
 
-    await message.answer(f"Сумма — {sum_}")
+    words = message.text.split()
+    arguments = words[1:]
+
+    if len(arguments) != 3:
+        await message.answer(
+            "Неправильные аргументы. Пример правильных:\n"
+            "/track BTC 5000 6000"
+        )
+        return
+
+    cryptocurrency_symbol = arguments[0]
+    first_threshold_dollars = as_number(arguments[1])
+    second_threshold_dollars = as_number(arguments[2])
+
+    if None in (first_threshold_dollars, second_threshold_dollars):
+        await message.answer(
+            "Неправильный диапазон. Пример правильного:\n"
+            "/track BTC 5000 6000"
+        )
+        return
+
+    try:
+        await services.add_tracking.perform(
+            message.chat.id,
+            cryptocurrency_symbol,
+            first_threshold_dollars,
+            second_threshold_dollars,
+        )
+        await message.answer("Отслеживание \"{cryptocurrency_symbol}\" началось")
+    except services.add_tracking.CoinmarketcapIsNotWorkingError:
+        await message.answer("Произошла ошибка. Попробуйте позже")
+    except services.add_tracking.NoCryptocurrencyError:
+        await message.answer(f"Криптовалюты \"{cryptocurrency_symbol}\" не знаем")
